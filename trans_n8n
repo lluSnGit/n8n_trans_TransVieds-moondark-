@@ -1,0 +1,897 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "searchKeyword",
+              "value": "={{ $json.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9288f4e5-2992-41e1-8cf6-a38e3e0861f1",
+      "name": "设置搜索关键词5",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.hits[0].largeImageURL }}",
+        "options": {}
+      },
+      "id": "479e74ab-5891-482c-a60b-837310cdb6f7",
+      "name": "下载图片10",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        280,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "filePath",
+              "value": "={{ 'C:/Users/Administrator/Desktop/n8n_images/news_' + $itemIndex + '.jpg' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bed91e8a-9301-40b2-b073-217a75d854cc",
+      "name": "生成文件路径",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        420,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "fileName": "={{ $json.filePath }}",
+        "options": {}
+      },
+      "id": "6b1791db-9db9-40fd-a90d-75286de48862",
+      "name": "保存图片到本地11",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        580,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "filePath": "={{ $json.filePath }}"
+      },
+      "id": "63395f5a-7d86-414a-96a4-6933f76b9077",
+      "name": "读取本地图片2",
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        720,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://122.51.187.38:3000/upload",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {
+          "allowUnauthorizedCerts": true
+        }
+      },
+      "id": "b4bc0540-a329-49af-825f-b8a3ac5eba82",
+      "name": "上传到服务器1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        860,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "minioUrl",
+              "value": "={{ 'http://122.51.187.38:3000' + $json.url }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "21539517-413c-4807-9e88-52d2079848e3",
+      "name": "生成 MinIO URL8",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        1020,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.imgbb.com/1/upload?key=03a8ab59671b3ee092a67004fd0ae8f9",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "image",
+              "value": "={{ $json.minioUrl }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d36be314-d61a-4255-869a-59881a945a5d",
+      "name": "上传到imgbb1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1180,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "url1",
+              "name": "Image url",
+              "value": "={{ $json.data.url }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1340,
+        0
+      ],
+      "id": "6093d2b3-d87d-42b6-855f-2287d9464f61",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const urls = items.map(item => item.json[\"Image url\"]);\nreturn [{ json: { url1: urls[0] || '', url2: urls[1] || '', url3: urls[2] || '' } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        280,
+        220
+      ],
+      "id": "5ec203ef-050c-41b2-a5f3-c7d5be4d5218",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "id": "0a27085c-c99b-44c8-bff3-b45fbfdeca95",
+      "name": "合并 MinIO URL1",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        440,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://pixabay.com/api/",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "51276609-dd31206a8c1c7865c43f749f7"
+            },
+            {
+              "name": "q",
+              "value": "={{ $json.searchKeyword }}"
+            },
+            {
+              "name": "image_type",
+              "value": "photo"
+            },
+            {
+              "name": "per_page",
+              "value": "3"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "99fa8589-fb2e-48ba-bfb9-b97788b19f25",
+      "name": "Pixabay 搜图7",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        140,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://aip.baidubce.com/oauth/2.0/token",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "grant_type",
+              "value": "client_credentials"
+            },
+            {
+              "name": "client_id",
+              "value": "GUKMlqQpoAzTFEFPALAv2eb7"
+            },
+            {
+              "name": "client_secret",
+              "value": "WKrdvcRiUOlBNuDvQDk9ScJzsRfaCoJ5"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        160,
+        480
+      ],
+      "id": "131d8cd4-8379-4e89-826a-574055d5fd8f",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://tsn.baidu.com/text2audio",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "tex",
+              "value": "={{ $json.text }}"
+            },
+            {
+              "name": "tok",
+              "value": "={{ $json.tok }}"
+            },
+            {
+              "name": "cuid",
+              "value": "n8n-user"
+            },
+            {
+              "name": "ctp",
+              "value": "1"
+            },
+            {
+              "name": "lan",
+              "value": "zh"
+            },
+            {
+              "name": "spd",
+              "value": "5"
+            },
+            {
+              "name": "pit",
+              "value": "5"
+            },
+            {
+              "name": "vol",
+              "value": "5"
+            },
+            {
+              "name": "per",
+              "value": "106"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "9828304c-0a97-46a1-a42b-573dae6d1231",
+      "name": "Text To Speech",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        900,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      text: $input.first().json.text1,\n      tok: \"24.1d799904ff252d99f585c20bbe4b8a97.2592000.1755349384.282335-119538808\"\n    }\n  },\n  {\n    json: {\n      text: $input.first().json.text2,\n      tok: \"24.1d799904ff252d99f585c20bbe4b8a97.2592000.1755349384.282335-119538808\"\n    }\n  },\n  {\n    json: {\n      text: $input.first().json.text3,\n      tok: \"24.1d799904ff252d99f585c20bbe4b8a97.2592000.1755349384.282335-119538808\"\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        760,
+        220
+      ],
+      "id": "55b28812-834a-406b-9407-bd49e1a8e5c6",
+      "name": "Code2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const texts = {};\n\nfor (const item of $input.all()) {\n  const json = item.json;\n  if (json.id === 1) texts.text1 = json.text;\n  else if (json.id === 2) texts.text2 = json.text;\n  else if (json.id === 3) texts.text3 = json.text;\n}\n\nreturn [{ json: texts }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        600,
+        360
+      ],
+      "id": "4493b0fa-9ec9-4e54-aa5d-c7b0a741a23b",
+      "name": "Code3"
+    },
+    {
+      "parameters": {
+        "functionCode": "return items.map((item, index) => {\n  const fileBuffer = item.binary.data;\n  return {\n    json: item.json,\n    binary: {\n      data: {\n        ...fileBuffer,\n        fileName: `audio${index + 1}.mp3`,\n        mimeType: 'audio/mp3',\n        fileExtension: 'mp3'\n      }\n    }\n  };\n});"
+      },
+      "name": "Rename MP3 Files",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        220
+      ],
+      "id": "90971e8a-4059-4b07-b351-fe9fb5b3ca15"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.moonshot.cn/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer sk-UcSsZ8h5KTNNF9Eq6rsOK1o1BAZDA3XR3uKgwlF1FeF0PJpJ"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": {
+          "model": "moonshot-v1-8k",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Generate 3 diverse today global news headlines in Chinese (each > 45 words). Return ONLY pure JSON format: {\"S1\":\"headline1\", \"S2\":\"headline2\", \"S3\":\"headline3\"} with no additional text or explanations."
+            }
+          ],
+          "temperature": 0.7
+        },
+        "options": {}
+      },
+      "id": "4d57f514-2bbf-4b83-ae85-604576ddcfdd",
+      "name": "获取新闻热点",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        -300,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const raw = $json.choices[0].message.content.trim();\nconst cleaned = raw.replace(/```json|```/g, '').trim();\nconst result = JSON.parse(cleaned);\nreturn [\n  { json: { id: 1, text: result.S1 } },\n  { json: { id: 2, text: result.S2 } },\n  { json: { id: 3, text: result.S3 } }\n];"
+      },
+      "id": "0f18ef85-c40c-4d56-aa2e-c79fc8cb092e",
+      "name": "拆分3条新闻",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -120,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "fileName": "={{ $json.filePath }}",
+        "options": {}
+      },
+      "id": "d1b4b7bd-5b4e-4cda-8cd3-827400342965",
+      "name": "保存图片到本地12",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "filePath",
+              "value": "={{ 'C:/Users/Administrator/Desktop/vedio/' + $binary.data.fileName }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d26fe9ed-58a6-4cba-bd73-ce2ad70a41fb",
+      "name": "生成文件路径2",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\n  return [{\n    json: {\n      text1: item.text1,\n      text2: item.text2,\n      text3: item.text3\n    }\n  }];"
+      },
+      "name": "Prepare Text Parameters",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1060,
+        640
+      ],
+      "id": "1c888ff0-a899-4db8-8b6f-06946ef9a514"
+    },
+    {
+      "parameters": {},
+      "id": "1c547338-829d-489b-bff6-e84a4c826386",
+      "name": "合并 MinIO URL2",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        1560,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json[\"text1\"] }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "0b7b3a64-6ed8-4a71-bced-0936540b1670",
+      "name": "Only Keep text1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=\"C:\\Users\\Administrator\\Desktop\\run_ffmpeg.bat\" \"{{ $json.text1 }}\" \"{{ $json.text2 }}\" \"{{ $json.text3 }}\""
+      },
+      "name": "Execute FFmpeg with Dynamic Text",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        2020,
+        300
+      ],
+      "id": "a5bbcb06-29a8-4748-82e5-ae724faa0208"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 23,
+              "triggerAtMinute": 47
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -480,
+        360
+      ],
+      "id": "70285101-0e10-4685-8a06-ea7e1608f7ad",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\Users\\Administrator\\Desktop\\create_vedio\\output.mp4"
+      },
+      "id": "11c4f5f6-ed72-4f43-84d1-169dda47102c",
+      "name": "Read Video File",
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "upload",
+        "options": {}
+      },
+      "id": "d66eac03-7c71-41ae-881a-17dece49722f",
+      "name": "YouTube",
+      "type": "n8n-nodes-base.youTube",
+      "position": [
+        2400,
+        320
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "jmCTdhjATo2CViEO",
+          "name": "YouTube account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "设置搜索关键词5": {
+      "main": [
+        [
+          {
+            "node": "Pixabay 搜图7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "下载图片10": {
+      "main": [
+        [
+          {
+            "node": "生成文件路径",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "生成文件路径": {
+      "main": [
+        [
+          {
+            "node": "保存图片到本地11",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "保存图片到本地11": {
+      "main": [
+        [
+          {
+            "node": "读取本地图片2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "读取本地图片2": {
+      "main": [
+        [
+          {
+            "node": "上传到服务器1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "上传到服务器1": {
+      "main": [
+        [
+          {
+            "node": "生成 MinIO URL8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "生成 MinIO URL8": {
+      "main": [
+        [
+          {
+            "node": "上传到imgbb1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "上传到imgbb1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "合并 MinIO URL1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "合并 MinIO URL1": {
+      "main": [
+        [
+          {
+            "node": "Code3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pixabay 搜图7": {
+      "main": [
+        [
+          {
+            "node": "下载图片10",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "合并 MinIO URL1",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Text To Speech": {
+      "main": [
+        [
+          {
+            "node": "Rename MP3 Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "Text To Speech",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code3": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Prepare Text Parameters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rename MP3 Files": {
+      "main": [
+        [
+          {
+            "node": "生成文件路径2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "获取新闻热点": {
+      "main": [
+        [
+          {
+            "node": "拆分3条新闻",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "拆分3条新闻": {
+      "main": [
+        [
+          {
+            "node": "合并 MinIO URL1",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "设置搜索关键词5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "保存图片到本地12": {
+      "main": [
+        [
+          {
+            "node": "合并 MinIO URL2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "生成文件路径2": {
+      "main": [
+        [
+          {
+            "node": "保存图片到本地12",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Text Parameters": {
+      "main": [
+        [
+          {
+            "node": "合并 MinIO URL2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "合并 MinIO URL2": {
+      "main": [
+        [
+          {
+            "node": "Only Keep text1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Only Keep text1": {
+      "main": [
+        [
+          {
+            "node": "Execute FFmpeg with Dynamic Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute FFmpeg with Dynamic Text": {
+      "main": [
+        [
+          {
+            "node": "Read Video File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "获取新闻热点",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Video File": {
+      "main": [
+        [
+          {
+            "node": "YouTube",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "609a76df85f5ab4d700e79840e57cc3b415a40c7fcfbafd8d51b1189d07167da"
+  }
+}
